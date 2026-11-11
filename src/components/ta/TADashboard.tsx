@@ -428,6 +428,13 @@ export const TADashboard: React.FC<TADashboardProps> = ({
                   </tr>
                 );
               })}
+              {filteredSubmissions.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="py-8 text-center text-slate-400">
+                    לא נמצאו הגשות התואמות לחיפוש או לסינון הנוכחי. נסה לאפס את הסינונים למעלה.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

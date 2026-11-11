@@ -9,12 +9,13 @@ import { TimedExamBanner } from './components/exam/TimedExamBanner';
 import { ExamScreen } from './components/exam/ExamScreen';
 import { Submission } from './types/autota';
 import { fetchSubmissions } from './services/api';
+import { INITIAL_SUBMISSIONS } from './data/mockData';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('student');
   const [isDark, setIsDark] = useState<boolean>(true);
   const [isExamMode, setIsExamMode] = useState<boolean>(false);
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>(INITIAL_SUBMISSIONS);
   const [selectedSubForLogs, setSelectedSubForLogs] = useState<Submission | null>(null);
 
   // Sync dark class on document element

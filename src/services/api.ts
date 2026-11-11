@@ -1,4 +1,5 @@
 import { Submission } from '../types/autota';
+import { INITIAL_SUBMISSIONS } from '../data/mockData';
 
 export interface EvaluatePayload {
   studentName?: string;
@@ -218,10 +219,13 @@ export async function fetchSubmissions(): Promise<Submission[]> {
 
     if (!res.ok) throw new Error('Failed to load submissions');
     const data = await res.json();
-    return data.submissions || [];
+    if (data.submissions && data.submissions.length > 0) {
+      return data.submissions;
+    }
+    return INITIAL_SUBMISSIONS;
   } catch (err) {
-    console.warn('API fetchSubmissions error, returning empty cache:', err);
-    return [];
+    console.warn('API fetchSubmissions error, using built-in initial submissions:', err);
+    return INITIAL_SUBMISSIONS;
   }
 }
 
