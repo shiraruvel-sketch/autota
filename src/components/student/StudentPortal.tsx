@@ -17,7 +17,13 @@ import {
   X,
   MessageSquare,
   Printer,
-  Terminal
+  Terminal,
+  Layers,
+  Award,
+  Trophy,
+  ShieldCheck,
+  Flame,
+  LayoutGrid
 } from 'lucide-react';
 import { Assignment, Submission } from '../../types/autota';
 import { INITIAL_ASSIGNMENTS } from '../../data/mockData';
@@ -25,6 +31,7 @@ import { submitAndEvaluate, generateLocalEvaluation } from '../../services/api';
 import { PipelineProgressModal } from './PipelineProgressModal';
 import { PedagogicalFeedbackModal } from './PedagogicalFeedbackModal';
 import { LiveInteractiveRunner } from '../runner/LiveInteractiveRunner';
+import { JavaFXSimulator } from '../simulator/JavaFXSimulator';
 import { printOrSavePDF } from '../../utils/exportUtils';
 
 interface StudentPortalProps {
@@ -61,14 +68,37 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
     setSelectedFeedbackSubmission(sub);
   };
 
+  // Multi-file state for 3-class JavaFX / multi-file assignments
+  const [multiFilesMap, setMultiFilesMap] = useState<Record<string, string>>({});
+  const [activeFileTab, setActiveFileTab] = useState<string>('MainApplication.java');
+
   const handleAssignmentChange = (assignId: string) => {
     const found = INITIAL_ASSIGNMENTS.find((a) => a.id === assignId);
     if (found) {
       setSelectedAssignment(found);
-      setCodeContent(found.sampleFiles[0]?.code || '');
-      setFileName(found.sampleFiles[0]?.name || (found.language === 'c' ? 'solution.c' : 'Solution.java'));
+      if (found.files && found.files.length > 0) {
+        const fileMap: Record<string, string> = {};
+        found.files.forEach((f) => {
+          fileMap[f.name] = f.code;
+        });
+        setMultiFilesMap(fileMap);
+        setActiveFileTab(found.files[0].name);
+        setFileName(found.files[0].name);
+        setCodeContent(found.files[0].code);
+      } else {
+        setCodeContent(found.sampleFiles[0]?.code || '');
+        setFileName(found.sampleFiles[0]?.name || (found.language === 'c' ? 'solution.c' : 'Solution.java'));
+      }
       setErrorMessage(null);
     }
+  };
+
+  const handleSelectFileTab = (fName: string) => {
+    // Save current content first
+    setMultiFilesMap((prev) => ({ ...prev, [fileName]: codeContent }));
+    setActiveFileTab(fName);
+    setFileName(fName);
+    setCodeContent(multiFilesMap[fName] || '');
   };
 
   const handleLoadSample = (sample: typeof selectedAssignment.sampleFiles[0]) => {
@@ -328,6 +358,37 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
             <span>עורך קוד חי (ניתן לעריכה ישירה)</span>
           </div>
 
+          {/* Multi-Class Tabs Bar (e.g. MainApplication.java, MatrixController.java, MatrixModel.java) */}
+          {selectedAssignment.files && selectedAssignment.files.length > 0 && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <span className="text-xs text-slate-400 font-medium shrink-0 flex items-center gap-1">
+                <Layers className="w-3.5 h-3.5 text-indigo-400" />
+                <span>מחלקות הפרויקט:</span>
+              </span>
+              <div className="flex items-center gap-1.5">
+                {selectedAssignment.files.map((file) => (
+                  <button
+                    key={file.name}
+                    type="button"
+                    onClick={() => handleSelectFileTab(file.name)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                      fileName === file.name
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <span>{file.name}</span>
+                    {file.isMain && (
+                      <span className="text-[9px] bg-white/20 text-white px-1 py-0.2 rounded font-sans">
+                        Main
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="relative flex-1 bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-inner font-mono text-xs text-left" dir="ltr">
             <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 text-[11px] text-slate-400 bg-slate-900/50">
               <span className="text-cyan-400">{fileName}</span>
@@ -346,7 +407,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
           <div className="flex items-center justify-between gap-4 pt-1">
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <Info className="w-3.5 h-3.5 text-cyan-500" />
-              <span>הבדיקה תעבור ב-3 שלבי Pipeline מבודדים עם פרופיילר Valgrind</span>
+              <span>הבדיקה מפעילה צי של 6 סוכני AI מקבילים (Architecture, CanvasGrid, Random, Thread, EdgeCase, Mentor)</span>
             </div>
 
             <button
@@ -354,11 +415,26 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-cyan-600/20 hover:shadow-cyan-600/30 transition-all cursor-pointer whitespace-nowrap active:scale-[0.98]"
             >
               <Play className="w-4 h-4 fill-white" />
-              <span>שגר לבדיקת סוכני AI (Run Pipeline)</span>
+              <span>שגר לבדיקת 6 סוכני AI (Run 6-Agent Swarm)</span>
             </button>
           </div>
         </div>
       </div>
+
+      {/* Visual JavaFX Interactive Simulator Component (When Assignment has Visual GUI) */}
+      {(selectedAssignment.hasVisualSimulation || selectedAssignment.id === 'assign-javafx') && (
+        <JavaFXSimulator
+          initialWidth={380}
+          initialHeight={260}
+          buggyMode={
+            codeContent.includes('10 / 100') || codeContent.includes('10/100')
+              ? 'int-division'
+              : !codeContent.includes('clearRect')
+              ? 'no-clear'
+              : 'none'
+          }
+        />
+      )}
 
       {/* Live In-Browser Interactive Execution Environment (stdout/stdin) */}
       <LiveInteractiveRunner
@@ -486,6 +562,92 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               })}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Academic Achievements & Gamification Badges */}
+      <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+              <Trophy className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                מרכז הישגים ותגים אקדמיים (Academic Mastery Badges)
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                הכרה במיומנויות הנדסיות, קוד נקי ועמידה במקרי קיצון
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-mono bg-amber-500/10 text-amber-600 dark:text-amber-400 px-3 py-1 rounded-full border border-amber-500/20">
+            <Flame className="w-3.5 h-3.5 fill-amber-500" />
+            <span>רצף למידה פעיל: 4 ימים רצופים!</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/20 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-500 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <span>שריון Valgrind</span>
+                <span className="text-[10px] text-emerald-600 font-mono">0 Leaks</span>
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                שחרור מלא של כל בלוקי ה-malloc ללא שגיאות זיכרון
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-xl border border-indigo-500/30 bg-indigo-50/20 dark:bg-indigo-950/20 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+              <Layers className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <span>מאסטר JavaFX & MVC</span>
+                <span className="text-[10px] text-indigo-400 font-mono">3 Classes</span>
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                הפרדה מושלמת בין Model, Controller ו-Application עם קנבס 10px
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-xl border border-cyan-500/30 bg-cyan-50/20 dark:bg-cyan-950/20 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-500 flex items-center justify-center shrink-0">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <span>צייד מקרי קצה</span>
+                <span className="text-[10px] text-cyan-600 font-mono">8/8 Passed</span>
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                עמידות מלאה לשינויי גודל, חלוקה באפס ולחיצות רציפות
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-xl border border-purple-500/30 bg-purple-50/20 dark:bg-purple-950/20 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+              <Award className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <span>חסין NullPointer</span>
+                <span className="text-[10px] text-purple-400 font-mono">Zero Crash</span>
+              </h4>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                בדיקת כל תנאי העצירה והמצביעים ברקורסיה ובעצים
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

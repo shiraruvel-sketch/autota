@@ -126,6 +126,45 @@ export const PipelineProgressModal: React.FC<PipelineProgressModalProps> = ({
     },
   ];
 
+  const sixAgents = [
+    {
+      id: 'agent-arch',
+      name: 'ArchitectureAgent',
+      role: 'ארכיטקטורת MVC ועיצוב מונחה עצמים',
+      status: currentStep >= 2 ? 'completed' : 'running',
+    },
+    {
+      id: 'agent-grid',
+      name: 'CanvasGridAgent',
+      role: 'מרווח קווי רשת 10px ושימוש ב-fillRect',
+      status: currentStep >= 2 ? 'completed' : currentStep === 1 ? 'running' : 'idle',
+    },
+    {
+      id: 'agent-random',
+      name: 'RandomDistributionAgent',
+      role: 'אימות כיסוי מדויק של 10% משבצות',
+      status: currentStep >= 3 ? 'completed' : currentStep === 2 ? 'running' : 'idle',
+    },
+    {
+      id: 'agent-thread',
+      name: 'EventThreadAgent',
+      role: 'תגובתיות כפתור שמאל עליון ו-JavaFX Thread',
+      status: currentStep >= 3 ? 'completed' : currentStep === 2 ? 'running' : 'idle',
+    },
+    {
+      id: 'agent-edge',
+      name: 'EdgeCaseStressAgent',
+      role: 'סימולציית קיצון: גדלי מסך ורצף לחיצות',
+      status: currentStep >= 4 ? 'completed' : currentStep === 3 ? 'running' : 'idle',
+    },
+    {
+      id: 'agent-mentor',
+      name: 'SocraticMentorAgent',
+      role: 'סינתזת שאלות חקר פדגוגיות (ללא פתרון ישיר)',
+      status: currentStep >= 4 ? 'completed' : currentStep === 3 ? 'running' : 'idle',
+    },
+  ];
+
   const handleManualOpen = () => {
     if (completedSubmission) {
       onComplete(completedSubmission);
@@ -243,6 +282,45 @@ export const PipelineProgressModal: React.FC<PipelineProgressModalProps> = ({
                 </div>
               );
             })}
+          </div>
+
+          {/* 6 AI Agents Swarm Monitor */}
+          <div className="p-3.5 bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-500" />
+                <span>צי סוכני AI פעיל (6 Autonomous Agents Swarm):</span>
+              </span>
+              <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                Parallel Multi-Agent Evaluation
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {sixAgents.map((ag) => (
+                <div
+                  key={ag.id}
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-[11px] flex items-center justify-between"
+                >
+                  <div className="truncate pr-1">
+                    <span className="font-semibold block truncate text-slate-800 dark:text-slate-200">
+                      {ag.name}
+                    </span>
+                    <span className="text-[10px] text-slate-500 truncate block">
+                      {ag.role}
+                    </span>
+                  </div>
+
+                  {ag.status === 'completed' ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  ) : ag.status === 'running' ? (
+                    <Loader2 className="w-3.5 h-3.5 text-cyan-500 animate-spin shrink-0" />
+                  ) : (
+                    <span className="w-2 h-2 rounded-full bg-slate-400 shrink-0" />
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Live Terminal Output Window */}

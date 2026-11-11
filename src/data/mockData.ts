@@ -274,6 +274,226 @@ int main() {
       },
     ],
   },
+  {
+    id: 'assign-javafx',
+    title: 'מטלה 4: יישום JavaFX - מטריצת קווי רשת ו-10% תאים רנדומליים (שאלה 2)',
+    course: 'תכנות מונחה עצמים ו-JavaFX מתקדם (89-211)',
+    language: 'java',
+    dueDate: '2026-12-10 23:59',
+    description: 'כתיבת יישום JavaFX מלא הכולל 3 מחלקות (MainApplication, Controller, Model) המציג Canvas עם קווי רשת במרווח 10px (כמו דף חשבון), כפתור בפינה השמאלית העליונה, ומילוי רנדומלי של בדיוק 10% מהתאים באמצעות GraphicsContext.fillRect.',
+    keyTopics: ['JavaFX Application & Stage', 'Canvas & GraphicsContext', '10px Grid Math', 'Controller Event Handling', 'MVC Architecture', '10% Random Sampling'],
+    isMultiFile: true,
+    hasVisualSimulation: true,
+    files: [
+      {
+        name: 'MainApplication.java',
+        description: 'מחלקת כניסה (extends Application) המגדירה Stage, Scene ומטעינה את ה-Canvas וה-Controller',
+        isMain: true,
+        code: `package com.autota.javafx;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Button;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+/**
+ * שאלה 2: מחלקת כניסה ראשית ליישום JavaFX
+ * מציגה חלון Application עם משטח Canvas וכפתור בפינה השמאלית העליונה
+ */
+public class MainApplication extends Application {
+    private static final double DEFAULT_WIDTH = 400;
+    private static final double DEFAULT_HEIGHT = 300;
+
+    @Override
+    public void start(Stage primaryStage) {
+        BorderPane root = new BorderPane();
+        
+        // יצירת רכיב Canvas הממוקם בתוך חלון Application
+        Canvas canvas = new Canvas(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        
+        // יצירת Controller ו-Model
+        MatrixModel model = new MatrixModel();
+        MatrixController controller = new MatrixController(canvas, model);
+        
+        // כפתור בפינה השמאלית העליונה
+        Button randomizeBtn = new Button("סידור רנדומלי חדש (10%)");
+        randomizeBtn.setOnAction(e -> controller.onRandomizeButtonClicked());
+        
+        VBox topBar = new VBox(8);
+        topBar.setStyle("-fx-padding: 10; -fx-background-color: #f1f5f9;");
+        topBar.getChildren().add(randomizeBtn);
+        
+        root.setTop(topBar);
+        root.setCenter(canvas);
+        
+        // ציור ראשוני בעת עליית החלון
+        controller.drawGridAndCells();
+        
+        // התאמה רספונסיבית לשינוי גודל החלון
+        canvas.widthProperty().bind(root.widthProperty());
+        canvas.heightProperty().bind(root.heightProperty().subtract(60));
+        canvas.widthProperty().addListener((obs, oldV, newV) -> controller.drawGridAndCells());
+        canvas.heightProperty().addListener((obs, oldV, newV) -> controller.drawGridAndCells());
+
+        Scene scene = new Scene(root, DEFAULT_WIDTH + 20, DEFAULT_HEIGHT + 70);
+        primaryStage.setTitle("שאלה 2: מטריצת JavaFX עם 10% משבצות רנדומליות");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
+`,
+      },
+      {
+        name: 'MatrixController.java',
+        description: 'מחלקת Controller המגיבה ללחיצת הכפתור ומנהלת את הציור על ה-Canvas עם GraphicsContext',
+        code: `package com.autota.javafx;
+
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import java.util.List;
+
+/**
+ * Controller המנהל את תגובת הממשק ומצייר על גבי ה-Canvas
+ */
+public class MatrixController {
+    public static final double GRID_STEP = 10.0; // מרווח מדויק של 10 פיקסלים (דף חשבון)
+    
+    private final Canvas canvas;
+    private final MatrixModel model;
+
+    public MatrixController(Canvas canvas, MatrixModel model) {
+        this.canvas = canvas;
+        this.model = model;
+    }
+
+    /**
+     * מתודה המגיבה ללחיצת הכפתור בפינה השמאלית העליונה
+     * בכל לחיצה יש להציג סידור רנדומלי חדש של התאים המלאים!
+     */
+    public void onRandomizeButtonClicked() {
+        drawGridAndCells();
+    }
+
+    /**
+     * ציור המטריצה והמשבצות המלאות
+     */
+    public void drawGridAndCells() {
+        double width = canvas.getWidth();
+        double height = canvas.getHeight();
+        if (width <= 0 || height <= 0) return;
+
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        // 1. ניקוי משטח הציור לפני כל ציור מחדש
+        gc.clearRect(0, 0, width, height);
+
+        // רקע לבן דמוי דף חשבון
+        gc.setFill(Color.WHITE);
+        gc.fillRect(0, 0, width, height);
+
+        int cols = (int) (width / GRID_STEP);
+        int rows = (int) (height / GRID_STEP);
+
+        // 2. מילוי רנדומלי של בדיוק 10% מהתאים (באמצעות Model)
+        List<MatrixModel.CellCoordinate> filledCells = model.generateRandomCells(cols, rows, 0.10);
+
+        gc.setFill(Color.web("#0f172a")); // צבע שחור/כהה לתאים מלאים
+        for (MatrixModel.CellCoordinate cell : filledCells) {
+            double x = cell.col() * GRID_STEP;
+            double y = cell.row() * GRID_STEP;
+            // מילוי ריבועים באמצעות המתודה fillRect של GraphicsContext!
+            gc.fillRect(x, y, GRID_STEP, GRID_STEP);
+        }
+
+        // 3. ציור קווי המטריצה המתפרסים על פני כל משטח הציור
+        gc.setStroke(Color.web("#94a3b8"));
+        gc.setLineWidth(1.0);
+
+        // קווים אנכיים עם מרווח של 10 פיקסלים
+        for (double x = 0; x <= width; x += GRID_STEP) {
+            gc.strokeLine(x, 0, x, height);
+        }
+
+        // קווים אופקיים עם מרווח של 10 פיקסלים
+        for (double y = 0; y <= height; y += GRID_STEP) {
+            gc.strokeLine(0, y, width, y);
+        }
+    }
+}
+`,
+      },
+      {
+        name: 'MatrixModel.java',
+        description: 'מחלקת Model המחשבת את סך התאים ומבצעת דגימה רנדומלית אחידה של בדיוק 10%',
+        code: `package com.autota.javafx;
+
+import java.util.*;
+
+/**
+ * מודל לוגי: חישוב מתמטי של מספר המשבצות ובחירה רנדומלית של 10% ללא חזרות
+ */
+public class MatrixModel {
+    public record CellCoordinate(int col, int row) {}
+
+    /**
+     * מייצר רשימת קואורדינטות של בדיוק 10% מהתאים במטריצה
+     * @param cols מספר העמודות
+     * @param rows מספר השורות
+     * @param ratio היחס (0.10 עבור 10%)
+     */
+    public List<CellCoordinate> generateRandomCells(int cols, int rows, double ratio) {
+        int totalCells = cols * rows;
+        if (totalCells <= 0) return Collections.emptyList();
+
+        // חישוב מדויק של 10% מהתאים (נמנע משגיאת חלוקה בשלמים!)
+        int targetFilled = (int) Math.round(totalCells * ratio);
+
+        Set<Integer> selectedIndices = new HashSet<>();
+        Random rng = new Random();
+
+        // בחירת אינדקסים ייחודיים ללא כפילויות
+        while (selectedIndices.size() < targetFilled && selectedIndices.size() < totalCells) {
+            int randIndex = rng.nextInt(totalCells);
+            selectedIndices.add(randIndex);
+        }
+
+        List<CellCoordinate> result = new ArrayList<>(selectedIndices.size());
+        for (int idx : selectedIndices) {
+            int col = idx % cols;
+            int row = idx / cols;
+            result.add(new CellCoordinate(col, row));
+        }
+
+        return result;
+    }
+}
+`,
+      },
+    ],
+    sampleFiles: [
+      {
+        name: 'JavaFX_Matrix_3Classes_Perfect.zip',
+        description: 'פרויקט 3 מחלקות תקין ומלא (MainApplication, Controller, Model) - ציון 100',
+        code: `// פרויקט JavaFX מלא הכולל 3 מחלקות: MainApplication.java, MatrixController.java, MatrixModel.java
+// עומד בכל דרישות שאלה 2: מרווח 10px, מילוי 10% ב-fillRect, כפתור שמאל עליון, MVC מלא.`,
+      },
+      {
+        name: 'JavaFX_Matrix_Buggy_IntegerDivision.zip',
+        description: 'פרויקט עם באגים: שגיאת 10/100 בשלמים (0 תאים מלאים) והיעדר clearRect',
+        code: `// באג נפוץ במטלה 2:
+// int filled = (10 / 100) * total; // מחזיר תמיד 0 ב-Java!
+// חסרה קריאה ל-gc.clearRect() ולכן המשבצות מצטברות מעבר ל-10% בכל לחיצה.`,
+      },
+    ],
+  },
 ];
 
 export const INITIAL_ANALYTICS: AnalyticsData = {

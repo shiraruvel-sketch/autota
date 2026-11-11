@@ -17,8 +17,19 @@ export interface PedagogicalFeedback {
   nextSteps: string[];
 }
 
+export type AgentName = 
+  | 'StaticAnalyzerAgent' 
+  | 'DockerSandboxAgent' 
+  | 'SocraticMentorAgent'
+  | 'ArchitectureAgent'
+  | 'CanvasGridAgent'
+  | 'RandomDistributionAgent'
+  | 'EventThreadAgent'
+  | 'EdgeCaseStressAgent'
+  | string;
+
 export interface AgentLogEntry {
-  agentName: 'StaticAnalyzerAgent' | 'DockerSandboxAgent' | 'SocraticMentorAgent';
+  agentName: AgentName;
   timestamp: string;
   action: string;
   reasoning: string;
@@ -57,6 +68,14 @@ export interface Submission {
   };
   pedagogicalFeedback: PedagogicalFeedback;
   agentLogs: AgentLogEntry[];
+  multiFiles?: { name: string; code: string }[];
+}
+
+export interface AssignmentFile {
+  name: string;
+  description: string;
+  code: string;
+  isMain?: boolean;
 }
 
 export interface Assignment {
@@ -67,6 +86,9 @@ export interface Assignment {
   dueDate: string;
   description: string;
   keyTopics: string[];
+  isMultiFile?: boolean;
+  hasVisualSimulation?: boolean;
+  files?: AssignmentFile[];
   sampleFiles: {
     name: string;
     description: string;
