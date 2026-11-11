@@ -23,7 +23,11 @@ import {
   Trophy,
   ShieldCheck,
   Flame,
-  LayoutGrid
+  LayoutGrid,
+  Download,
+  TrendingUp,
+  FlaskConical,
+  Users
 } from 'lucide-react';
 import { Assignment, Submission } from '../../types/autota';
 import { INITIAL_ASSIGNMENTS } from '../../data/mockData';
@@ -32,6 +36,10 @@ import { PipelineProgressModal } from './PipelineProgressModal';
 import { PedagogicalFeedbackModal } from './PedagogicalFeedbackModal';
 import { LiveInteractiveRunner } from '../runner/LiveInteractiveRunner';
 import { JavaFXSimulator } from '../simulator/JavaFXSimulator';
+import { BigOVisualizer } from '../complexity/BigOVisualizer';
+import { CustomUnitTestPlayground } from '../testing/CustomUnitTestPlayground';
+import { PeerReviewCenter } from '../peer/PeerReviewCenter';
+import { downloadJavaFXProjectZip } from '../../utils/zipExporter';
 import { printOrSavePDF } from '../../utils/exportUtils';
 
 interface StudentPortalProps {
@@ -71,6 +79,19 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
   // Multi-file state for 3-class JavaFX / multi-file assignments
   const [multiFilesMap, setMultiFilesMap] = useState<Record<string, string>>({});
   const [activeFileTab, setActiveFileTab] = useState<string>('MainApplication.java');
+  const [studentSubTab, setStudentSubTab] = useState<'workspace' | 'complexity' | 'testing' | 'peer'>('workspace');
+
+  const handleExportZip = async () => {
+    if (selectedAssignment.files && selectedAssignment.files.length > 0) {
+      const filesToExport = selectedAssignment.files.map((f) => ({
+        name: f.name,
+        code: multiFilesMap[f.name] || f.code,
+      }));
+      await downloadJavaFXProjectZip(filesToExport, 'AutoTA_JavaFX_Project');
+    } else {
+      await downloadJavaFXProjectZip([{ name: fileName, code: codeContent }], 'AutoTA_Solution');
+    }
+  };
 
   const handleAssignmentChange = (assignId: string) => {
     const found = INITIAL_ASSIGNMENTS.find((a) => a.id === assignId);
@@ -254,9 +275,21 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
             </p>
           </div>
 
-          <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 w-fit">
-            שפה: {selectedAssignment.language.toUpperCase()}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportZip}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-all cursor-pointer shadow-xs"
+              title="הורד את כל קבצי הפרויקט יחד עם pom.xml לפתיחה ישירה ב-IntelliJ IDEA או Eclipse"
+            >
+              <Download className="w-3.5 h-3.5 text-indigo-500" />
+              <span>הורד פרויקט מוכן ל-IntelliJ (.zip)</span>
+            </button>
+
+            <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 w-fit">
+              שפה: {selectedAssignment.language.toUpperCase()}
+            </span>
+          </div>
         </div>
 
         <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -276,7 +309,72 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
         </div>
       </div>
 
-      {/* Upload Zone & Interactive Code Editor */}
+      {/* Student Navigation Sub-Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto border-b border-slate-200 dark:border-slate-800 pb-2">
+        <button
+          onClick={() => setStudentSubTab('workspace')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+            studentSubTab === 'workspace'
+              ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm'
+              : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+        >
+          <Code className="w-4 h-4 text-cyan-500" />
+          <span>מרחב קוד וסימולטור (Workspace)</span>
+        </button>
+
+        <button
+          onClick={() => setStudentSubTab('complexity')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+            studentSubTab === 'complexity'
+              ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm'
+              : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4 text-purple-500" />
+          <span>מנתח סיבוכיות גרפי Big-O</span>
+        </button>
+
+        <button
+          onClick={() => setStudentSubTab('testing')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+            studentSubTab === 'testing'
+              ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm'
+              : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+        >
+          <FlaskConical className="w-4 h-4 text-emerald-500" />
+          <span>מעבדת בדיקות יחידה JUnit 5</span>
+        </button>
+
+        <button
+          onClick={() => setStudentSubTab('peer')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+            studentSubTab === 'peer'
+              ? 'bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 shadow-sm'
+              : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+          }`}
+        >
+          <Users className="w-4 h-4 text-teal-500" />
+          <span>ביקורת עמיתים אנונימית (Peer Review)</span>
+        </button>
+      </div>
+
+      {studentSubTab === 'complexity' && (
+        <BigOVisualizer assignmentId={selectedAssignment.id} />
+      )}
+
+      {studentSubTab === 'testing' && (
+        <CustomUnitTestPlayground />
+      )}
+
+      {studentSubTab === 'peer' && (
+        <PeerReviewCenter />
+      )}
+
+      {studentSubTab === 'workspace' && (
+        <>
+          {/* Upload Zone & Interactive Code Editor */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Drag & Drop Zone */}
         <div className="lg:col-span-5 space-y-4">
@@ -442,6 +540,8 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
         fileName={fileName}
         code={codeContent}
       />
+        </>
+      )}
 
       {/* Submissions History Table */}
       <div className="space-y-4">

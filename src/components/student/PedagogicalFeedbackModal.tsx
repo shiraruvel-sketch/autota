@@ -18,6 +18,7 @@ import {
 import { Submission } from '../../types/autota';
 import { sendSocraticChatMessage } from '../../services/api';
 import { printOrSavePDF } from '../../utils/exportUtils';
+import { VoiceSocraticAudio } from '../mentor/VoiceSocraticAudio';
 
 interface PedagogicalFeedbackModalProps {
   submission: Submission | null;
@@ -193,9 +194,12 @@ export const PedagogicalFeedbackModal: React.FC<PedagogicalFeedbackModalProps> =
             <div className="space-y-6">
               {/* Summary Card */}
               <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100 font-semibold text-base mb-2">
-                  <Sparkles className="w-4 h-4 text-cyan-500" />
-                  <span>סיכום הערכת המנטור</span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 text-slate-900 dark:text-slate-100 font-semibold text-base">
+                    <Sparkles className="w-4 h-4 text-cyan-500" />
+                    <span>סיכום הערכת המנטור</span>
+                  </div>
+                  <VoiceSocraticAudio textToSpeak={submission.pedagogicalFeedback.summary} />
                 </div>
                 <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
                   {submission.pedagogicalFeedback.summary}
