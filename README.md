@@ -1,73 +1,93 @@
-# 🎓 AutoTA - AI Pedagogical Code Grader & Multi-Agent Pipeline
+# 🎓 AutoTA - AI Pedagogical Code Grader & Multi-Agent Swarm
 
-> **מערכת אוטומטית לבדיקת מטלות תכנות (C / Java) ומתן משוב פדגוגי סוקרטי מבוססת סוכני AI.**
+> **פלטפורמת Full-Stack אקדמית מתקדמת לבדיקת מטלות תכנות (C / Java), הדמיית יישומי JavaFX, ומתן משוב פדגוגי סוקרטי מבוסס צי של 6 סוכני AI.**
 
-AutoTA היא פלטפורמת Full-Stack אקדמית לבדיקה, הערכה וניטור של מטלות תכנות ומבחנים מקוונים. במקום להחזיר רק הודעת שגיאה טכנית יבשה, המערכת מפעילה ארכיטקטורה של 3 סוכני AI המייצרים **משוב סוקרטי מנחה** שמלמד את הסטודנט להבין את הטעות בעצמו ללא חשיפת פתרון ישיר.
+AutoTA היא פלטפורמה אקדמית לבדיקה, הערכה וניטור של מטלות תכנות, פרויקטים מרובי-מחלקות ומבחנים מקוונים.  
+במקום להחזיר רק הודעת שגיאה טכנית יבשה, המערכת מפעילה ארכיטקטורה מקבילית של **6 סוכני AI עצמאיים** המייצרים **משוב סוקרטי מנחה** שמלמד את הסטודנט להבין את הטעות בעצמו ללא חשיפת פתרון ישיר.
+
+🌐 **אתר פעיל וחי (Production):** [AutoTA on Vercel](https://autota-er5mrrms3-shira-8770s-projects.vercel.app)
 
 ---
 
-## 🚀 תכונות עיקריות (Features)
+## 🚀 תכונות ויכולות מרכזיות (Key Features)
 
-1. **פורטל סטודנט (Student Portal)**:
-   - העלאת קבצים (Drag & Drop) עם תמיכה בקבצי `.c`, `.java`, `.zip`.
-   - עורך קוד חי עם דוגמאות מובנות (זליגות זיכרון Valgrind, חריגות NullPointer ב-Java, ועוד).
-   - סביבת הרצה חיה אינטראקטיבית בדפדפן (Live Interactive Runner עם קלט `stdin` ופלט `stdout`).
-   - דוח משוב פדגוגי סוקרטי מפורט עם הדגשת שורות קוד בעייתיות (Annotated Code).
-   - צ'אט אינטראקטיבי חי עם מנטור ה-AI לשאלות הבנה.
+### 1. ☕ תמיכה בפרויקטי JavaFX מרובי-מחלקות (3 Classes MVC)
+- **סרגל טאבים למחלקות:** תמיכה מלאה בפרויקטים מורכבים עם מעבר ועריכה חיה בין:
+  - `MainApplication.java` (extends Application, Stage & Scene setup)
+  - `MatrixController.java` (Canvas, GraphicsContext, strokeLine, fillRect & Event Handling)
+  - `MatrixModel.java` (Logic & 10% Uniform Random Sampling)
+- **הורדת פרויקט מוכן ל-IntelliJ IDEA (.zip):** ייצוא מלא בלחיצת כפתור אחת כולל קובץ `pom.xml` (Maven) ו-JavaFX 21 מוכן להרצה מיידית.
 
-2. **זרימת בדיקה רב-סוכנית מונפשת (3-Stage Pipeline)**:
-   - **שלב 1: סורק קוד (Static Analysis)** – Clang-Tidy, SpotBugs וסריקת תחביר AST.
-   - **שלב 2: סביבת הרצה מבודדת (Docker Sandbox)** – קומפילציית GCC/Javac, פרופיילר Valgrind וטסטים מבודדים.
-   - **שלב 3: סינתוז משוב פדגוגי (Socratic AI Mentor)** – מניעת חשיפת פתרון קוד מוכן והמרת שגיאות לשאלות חקר.
+### 2. 🎨 סימולטור JavaFX חי ואינטראקטיבי בדפדפן (Visual Canvas Simulator)
+- **הדמיית קנבס מדויקת (שאלה 2):** קווי רשת במרווח של 10 פיקסלים (דף חשבון).
+- **כפתור עליון בפינה השמאלית:** לחיצה עליו מפעילה את ה-Controller ומערבבת מחדש בדיוק 10% משבצות רנדומליות באמצעות `GraphicsContext.fillRect`.
+- **טלמטריה מתמטית בזמן אמת:** סך המשבצות, אחוז הכיסוי המדויק, מונה לחיצות ובוחן באגים מובנה (זיהוי שגיאת חלוקת שלמים `10/100=0` או חוסר ב-`clearRect`).
 
-3. **לוח בקרה למתרגל (TA Dashboard)**:
-   - אנליטיקס קורסי: שיעורי הצלחה, ציון ממוצע, וזיהוי שגיאות נפוצות (42% Memory Leaks).
-   - טבלת ניהול הגשות וסינון לפי שפה ומטלה, כולל עריכת ציון ידנית.
-   - ייצוא גיליון ציונים ישירות ל-Excel (`.csv` תואם עברית עם BOM).
+### 3. 🤖 צי מורחב של 6 סוכני AI עצמאיים (6-Agent Autonomous Swarm)
+בכל הגשה מופעל תהליך מקבילי של 6 סוכנים:
+1. 🏛️ **ArchitectureAgent:** בודק הפרדת רשויות ב-MVC (Application, Controller, Model).
+2. 📏 **CanvasGridAgent:** מאמת מרווח קווי רשת בדיוק 10.0px ושימוש ב-`strokeLine` ו-`fillRect`.
+3. 🎲 **RandomDistributionAgent:** מוודא דגימה של בדיוק 10% מהתאים ללא כפילויות.
+4. ⚡ **EventThreadAgent:** בודק תגובתיות כפתור עליון ב-JavaFX Application Thread.
+5. 🧪 **EdgeCaseStressAgent:** מריץ סימולציות קיצון (גדלי מסך 0x0, עיוותי יחס גובה-רוחב, לחיצות מהירות).
+6. 🎓 **SocraticMentorAgent:** מסנתז את ממצאי כל הסוכנים למשוב פדגוגי מעצים ללא גילוי ישיר של הקוד.
 
-4. **זיהוי פלגיאט ודמיון קוד (MOSS & LLM Detector)**:
-   - השוואת עץ תחביר AST בין הגשות סטודנטים לזיהוי שינויי שמות משתנים שטחיים.
-   - אלגוריתם זיהוי קוד שנוצר ע"י מודלי שפה (ChatGPT / Copilot).
-   - תצוגת השוואה זה-לצד-זה (Side-by-Side Diff) עם שורות חופפות.
+### 4. 📈 מנתח סיבוכיות גרפי Big-O אינטראקטיבי (Complexity Visualizer)
+- השוואת עקומות סיבוכיות ויזואליות: $O(1)$, $O(\log N)$, $O(N)$, $O(N \log N)$ ו-$O(N^2)$.
+- סליידר דינמי לגודל הקלט $N$ עם חישוב מספר הפעולות בזמן אמת.
+- ניתוח סיבוכיות מקום Stack מול Heap והמלצות אופטימיזציה אלגוריתמיות של ה-AI.
 
-5. **מערכת מבחנים ובחנים מוגבלים בזמן (Timed Exam Mode)**:
-   - תמיכה במבחנים לפי מקצועות (תכנות מערכות ב-C, מבני נתונים ב-Java, ועוד).
-   - שאלות אמריקאיות ושאלות קוד מעשיות.
-   - שעון עצר רץ לאחור (טיימר 90 דקות).
-   - מערכת השגחה (Proctoring) המזהה ומדווחת על יציאה מחלון הבחינה.
-   - חישוב ציון ופירוט נקודות מיידי עם סיום המבחן.
+### 5. 🎙️ מנטור סוקרטי קולי (Voice AI Socratic Mentor)
+- **Text-to-Speech:** האזנה קולית טבעית למשוב המנטור ולשאלות המנחות עם אנימציית גלי קול.
+- **Speech-to-Text:** שאילת שאלות בקול באמצעות מיקרופון ותמלול ישיר לצ'אט הסוקרטי.
 
-6. **שלד שרת ב-Python FastAPI וסכמות PostgreSQL**:
-   - מודלים מלאים של SQLAlchemy 2.0 Async (`Student`, `Assignment`, `Submission`, `AgentLog`).
-   - סקריפט DDL מלא עבור PostgreSQL עם מפתחות זרים ואינדקסים.
-   - ראוטרים של FastAPI להעלאת קבצים, הפעלת סוכנים וחישוב אנליטיקס.
+### 6. 👥 מרכז ביקורת עמיתים אנונימית (Double-Blind Peer Review)
+- צפייה וביקורת קוד של סטודנטים אחרים תחת חיסיון שמות ות"ז מוחלט.
+- מערכת הערות שורה עם הדרכת AI למשוב בונה והצבעות "עזר לי".
+
+### 7. 🧪 מעבדת בדיקות יחידה אישית (JUnit 5 Test Suite Playground)
+- הגדרת מקרי קיצון מותאמים אישית (גדלי קנבס קיצוניים, יחסי מילוי 5%-50%).
+- הרצת סוויטת Assertions מבודדת ומדידת זמן ביצוע במילי-שניות (Latency).
+
+### 8. 🏆 מרכז הישגים ותגים אקדמיים (Academic Mastery Badges)
+- תגי הישג: "שריון Valgrind", "מאסטר JavaFX & MVC", "צייד מקרי קצה", "חסין NullPointer".
+- מעקב רצף למידה יומי (Study Streak).
+
+### 9. 🔍 זיהוי פלגיאט ודמיון קוד (MOSS & AI Detector)
+- אלגוריתם השוואת עצי תחביר AST בין הגשות סטודנטים.
+- זיהוי קוד שנכתב ע"י מודלי שפה (ChatGPT / Copilot) עם תצוגת Side-by-Side Diff.
+
+### 10. 📝 מערכת מבחנים מתוזמנת ומפוקחת (Timed Exam Screen)
+- בחירת מבחנים לפי מקצועות: מערכות הפעלה ב-C, מבני נתונים ב-Java, ארכיטקטורת מחשבים.
+- שעון עצר רץ לאחור (90 דקות), השגחה לזיהוי עזיבת חלון הבחינה (Proctor Alerts) ושקלול ציון מיידי.
 
 ---
 
 ## 🛠️ טכנולוגיות (Tech Stack)
 
-- **Frontend**: React 19, TypeScript, Tailwind CSS v4, Lucide Icons, Motion.
-- **Backend (Node.js)**: Express Server עם אינטגרציית `@google/genai` (Gemini Flash).
-- **Backend (Python Blueprint)**: FastAPI, SQLAlchemy 2.0 Async, Pydantic v2, PostgreSQL 16.
-- **Testing & Sandbox Simulation**: GCC 11, Clang-Tidy, Valgrind Memcheck, OpenJDK, JUnit 5.
+- **Frontend:** React 19, TypeScript, Tailwind CSS v4, Lucide Icons, Motion, JSZip.
+- **Backend (Node.js):** Express Server עם אינטגרציית `@google/genai` (Gemini Flash).
+- **Backend Blueprint (Python):** FastAPI, SQLAlchemy 2.0 Async, Pydantic v2, PostgreSQL 16.
+- **Simulators & Compilers:** GCC 11, Clang-Tidy, Valgrind Memcheck, JavaFX 21, OpenJDK, JUnit 5.
+- **Deployment:** Vercel (CI/CD Pipeline מחובר ישירות ל-GitHub).
 
 ---
 
 ## 💻 התקנה והרצה מקומית (Local Setup)
 
 ```bash
-# 1. שכפול המאגר
-git clone https://github.com/YOUR_USERNAME/autota.git
+# 1. שכפול המאגר מ-GitHub
+git clone https://github.com/shiraruvel-sketch/autota.git
 cd autota
 
-# 2. התקנת תלויות
+# 2. התקנת כל התלויות
 npm install
 
 # 3. הפעלת שרת הפיתוח
 npm run dev
 ```
 
-פתח את הדפדפן בכתובת: `http://localhost:3000`
+האפליקציה תיפתח בדפדפן בכתובת: `http://localhost:3000`
 
 ---
 
